@@ -1,12 +1,25 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from App.database import Base, engine
-from App.routers import singin
+from App.routers import singin, login, token, authorization
+from App.utils.config import ALLOWED_ORIGINS
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-app.include_router(singin.router,tags=["singin"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(singin.router)
+app.include_router(login.router)
+app.include_router(token.router)
+app.include_router(authorization.router)
 
 @app.get("/")
 def home():
