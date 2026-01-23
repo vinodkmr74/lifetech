@@ -4,9 +4,19 @@ from App.database import Base, engine
 from App.routers import singin, login, token, authorization
 from App.utils.config import ALLOWED_ORIGINS
 
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+# Base.metadata.create_all(bind=engine)
+# SAFE: DB init at startup (NOT import time)
+@app.on_event("startup")
+def startup_event():
+    try:
+        Base.metadata.create_all(bind=engine)
+        print(" Database connected & tables created")
+    except Exception as e:
+        print("Database connection failed:", e)
+
 
 app.add_middleware(
     CORSMiddleware,
